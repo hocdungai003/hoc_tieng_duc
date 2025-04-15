@@ -11,18 +11,28 @@ export function FillBlanks() {
   const [showResult, setShowResult] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
   const [gameQuestions, setGameQuestions] = useState<typeof easy>([]);
 
   // Function to shuffle array
-  const shuffleArray = (array: typeof easy) => {
+  const shuffleArray = (array: any[]) => {
     return [...array].sort(() => Math.random() - 0.5);
   };
 
-  // Initialize game questions
+  // Initialize game questions with shuffled options
   useEffect(() => {
-    const easyQuestions = shuffleArray(easy).slice(0, 7);
-    const mediumQuestions = shuffleArray(medium).slice(0, 7);
-    const hardQuestions = shuffleArray(hard).slice(0, 6);
+    const easyQuestions = shuffleArray(easy).slice(0, 7).map((question) => ({
+      ...question,
+      options: shuffleArray([...question.options]), // Shuffle options for each question
+    }));
+    const mediumQuestions = shuffleArray(medium).slice(0, 7).map((question) => ({
+      ...question,
+      options: shuffleArray([...question.options]), // Shuffle options for each question
+    }));
+    const hardQuestions = shuffleArray(hard).slice(0, 6).map((question) => ({
+      ...question,
+      options: shuffleArray([...question.options]), // Shuffle options for each question
+    }));
     setGameQuestions([...easyQuestions, ...mediumQuestions, ...hardQuestions]);
   }, []);
 
@@ -38,20 +48,23 @@ export function FillBlanks() {
     setSelectedAnswer(answer);
     const correct = answer === gameQuestions[currentQuestionIndex].correctAnswer;
     setIsCorrect(correct);
-    
+
     if (correct) {
       setScore(score + 1);
+    } else {
+      setShowCorrectAnswer(true);
     }
 
     setTimeout(() => {
-      if (currentQuestionIndex < 19) { // 20 questions total (0-19)
+      setShowCorrectAnswer(false);
+      if (currentQuestionIndex < 19) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
         setSelectedAnswer(null);
         setIsCorrect(null);
       } else {
         setShowResult(true);
       }
-    }, 1000);
+    }, correct ? 1000 : 2000);
   };
 
   const handleRestart = () => {
@@ -60,10 +73,20 @@ export function FillBlanks() {
     setShowResult(false);
     setSelectedAnswer(null);
     setIsCorrect(null);
-    // Reshuffle questions for new game
-    const easyQuestions = shuffleArray(easy).slice(0, 7);
-    const mediumQuestions = shuffleArray(medium).slice(0, 7);
-    const hardQuestions = shuffleArray(hard).slice(0, 6);
+    setShowCorrectAnswer(false);
+    // Reshuffle questions and options for new game
+    const easyQuestions = shuffleArray(easy).slice(0, 7).map((question) => ({
+      ...question,
+      options: shuffleArray([...question.options]),
+    }));
+    const mediumQuestions = shuffleArray(medium).slice(0, 7).map((question) => ({
+      ...question,
+      options: shuffleArray([...question.options]),
+    }));
+    const hardQuestions = shuffleArray(hard).slice(0, 6).map((question) => ({
+      ...question,
+      options: shuffleArray([...question.options]),
+    }));
     setGameQuestions([...easyQuestions, ...mediumQuestions, ...hardQuestions]);
   };
 
@@ -122,6 +145,8 @@ export function FillBlanks() {
                     ? isCorrect
                       ? 'bg-green-500 text-white'
                       : 'bg-red-500 text-white'
+                    : showCorrectAnswer && option === question.correctAnswer
+                    ? 'bg-green-500 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
                 }`}
               >
@@ -129,6 +154,12 @@ export function FillBlanks() {
               </button>
             ))}
           </div>
+
+          {showCorrectAnswer && (
+            <div className="mt-4 text-green-600 font-semibold">
+              Đáp án đúng: {question.correctAnswer}
+            </div>
+          )}
 
           <div className="mt-6 flex justify-between items-center">
             <div className="text-lg font-semibold text-gray-600">

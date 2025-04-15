@@ -45,11 +45,10 @@ export function SpeedTranslation() {
   const handleSubmit = () => {
     const isCorrect = checkAnswer(answer, gameQuestions[currentQuestion].german);
     setFeedback(isCorrect ? 'correct' : 'incorrect');
-    
+
     if (isCorrect) {
       const newScore = score + 1;
       setScore(newScore);
-      // Update high score immediately if new score is higher
       if (newScore > highScore) {
         setHighScore(newScore);
         localStorage.setItem('speedTranslationHighScore', newScore.toString());
@@ -58,7 +57,7 @@ export function SpeedTranslation() {
         if (currentQuestion < gameQuestions.length - 1) {
           setCurrentQuestion(currentQuestion + 1);
           setAnswer('');
-          setTimeLeft(15);
+          setTimeLeft(45); // Reset time for the next question
           setFeedback(null);
         } else {
           setShowResult(true);
@@ -82,6 +81,12 @@ export function SpeedTranslation() {
     setFeedback(null);
   };
 
+  const handleExit = () => {
+    // Define what happens on exit (e.g., redirect to home page or clear state)
+    window.location.href = '/'; // Example: redirect to home page
+    // Alternatively, you could reset the game or navigate elsewhere
+  };
+
   if (showResult) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -93,12 +98,27 @@ export function SpeedTranslation() {
           <p className="text-lg text-gray-600 mb-6">
             Điểm cao nhất: {highScore} / {gameQuestions.length}
           </p>
-          <button
-            onClick={handleRestart}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            Chơi lại
-          </button>
+          {feedback === 'incorrect' && (
+            <div className="mb-6">
+              <p className="text-lg text-red-600">
+                Đáp án đúng: {gameQuestions[currentQuestion].german.join(' hoặc ')}
+              </p>
+            </div>
+          )}
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={handleRestart}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Chơi lại
+            </button>
+            <button
+              onClick={handleExit}
+              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Thoát
+            </button>
+          </div>
         </div>
       </div>
     );
