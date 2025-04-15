@@ -47,7 +47,7 @@ export function TrueFalse() {
       } else {
         setShowResult(true);
       }
-    }, 2000);
+    }, 4000);
   };
 
   const handleRestart = () => {
